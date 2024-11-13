@@ -4,13 +4,19 @@ import idautils
 import idaapi
 import idc
 
+class func():
+    def __init__(name, addr):
+        self.name = name
+        self.addr = addr
+
+class callpath():
+    def __init__(start: func, end:func, path: func):
+        pass
+
 # Recursive function to search for the target function
-def _find_path_to_target_function(current_function, target_function, path, visited):
+def _find_path_to_target_function(current_function, target_function, path):
     # Add the current function to the path
     path.append(current_function)
-
-    # Mark the current function as visited
-    visited.add(current_function)
 
     # Check if we've reached the target function
     if idc.get_func_name(current_function) == target_function:
@@ -26,9 +32,9 @@ def _find_path_to_target_function(current_function, target_function, path, visit
             # Get the address of the called function
             target = idc.get_operand_value(ref, 0)
             # Check if this is a valid function and hasn't been visited
-            if idc.get_func_name(target) and target not in visited:
+            if idc.get_func_name(target):
                 # Recursively search from the called function
-                _find_path_to_target_function(target, target_function, path, visited)
+                _find_path_to_target_function(target, target_function, path)
 
     # Remove the current function from the path when going back
     path.pop()
@@ -40,6 +46,6 @@ def find_path_to_target_function(target):
     # Check if the main function was found
     if root_function != idaapi.BADADDR:
         print("Starting search from current function...")
-        _find_path_to_target_function(root_function, target, [], set())
+        _find_path_to_target_function(root_function, target, [])
     else:
         print("root function ea not found.")
