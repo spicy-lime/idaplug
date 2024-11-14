@@ -15,7 +15,7 @@ class callpath():
         pass
 
 # Recursive function to search for the target function
-def _find_path_to_target_function(current_function, current_name, target_function, path, visited):
+def _find_path_to_target_function(current_function, current_name, target_function, path, visited, already):
     # Add the current function to the path
     path.append(current_name)
     #print(f"current {current_name}")
@@ -23,7 +23,12 @@ def _find_path_to_target_function(current_function, current_name, target_functio
     # Check if we've reached the target function
     if current_name == target_function:
         # Print the path to the target
-        print("PATH to", target_function, ":", " -> ".join([str(addr) for addr in path]))
+        res = "PATH to", target_function, ":", " -> ".join([str(addr) for addr in path])
+        #print("".join(res))
+        if res not in already:
+            print(" ".join(res))
+        already.add(res)
+
         # Remove the current function from the path and return
         path.pop()
         return
@@ -40,7 +45,7 @@ def _find_path_to_target_function(current_function, current_name, target_functio
             if child_ea and child_name not in visited:
                 # Recursively search from the called function
                 #print(f"     decending to -> {child_name}")
-                _find_path_to_target_function(child_ea, child_name, target_function, path, visited)
+                _find_path_to_target_function(child_ea, child_name, target_function, path, visited, already)
             else:
                 #print(f"     call already in visited -> {child_name}")
                 pass
@@ -55,7 +60,7 @@ def find_path_to_target_function(target):
     # Check if the main function was found
     if root_function != idaapi.BADADDR:
         print("Starting search from current function...")
-        _find_path_to_target_function(root_function, idc.get_func_name(root_function), target, [], set())
+        _find_path_to_target_function(root_function, idc.get_func_name(root_function), target, [], set(), set())
         print("done")
     else:
         print("root function ea not found.")
